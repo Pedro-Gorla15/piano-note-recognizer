@@ -1,7 +1,5 @@
 package main
 
-// Cambio de comentario
-
 import (
 	"fmt"
 	"path/filepath"
