@@ -1,7 +1,6 @@
 package main
 
-// Este es comentario para probar si se actualizan los archivos en github luego de
-// usar git en la cmd
+// Cambio de comentario
 
 import (
 	"fmt"
