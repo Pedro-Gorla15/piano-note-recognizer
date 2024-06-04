@@ -121,7 +121,7 @@ func NormalizeSpectrogram(spectrogram [][]float64) [][]float64 {
 	return spectrogram
 }
 
-// Helper function to find the maximum absolute value in a slice
+// Función que ayuda a encontrar el valor absoluto máximo en un slice
 func findMaxAbs(slice []float64) float64 {
 	maxVal := 0.0
 	for _, v := range slice {
