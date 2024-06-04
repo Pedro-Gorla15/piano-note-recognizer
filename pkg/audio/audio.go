@@ -97,10 +97,10 @@ func hannWindow(size int) []float64 {
 	}
 
 	window := make([]float64, size)
-	piFactor := 2 * math.Pi / float64(size-1) // Pre-compute factor to reduce operation in loop
+	piFactor := 2 * math.Pi / float64(size-1) // Factor pre-computado para reducir operaciones en el loop
 
 	for i := range window {
-		window[i] = 0.5 * (1 - math.Cos(piFactor*float64(i))) // Apply Hann window formula
+		window[i] = 0.5 * (1 - math.Cos(piFactor*float64(i))) // Se aplica la formula de la ventana de Hann
 	}
 	return window
 }
