@@ -70,7 +70,7 @@ func (r *RNN) forward(x *tensor.Dense) (*gorgonia.Node, error) {
 		return nil, fmt.Errorf("failed matrix multiplication: %v", err)
 	}
 
-	r.h0 = gorgonia.Must(gorgonia.Tanh(mulResult)) // Agrega activación
+	r.h0 = gorgonia.Must(gorgonia.Tanh(mulResult))
 
 	output, err := gorgonia.Mul(r.h0, r.outW)
 	if err != nil {

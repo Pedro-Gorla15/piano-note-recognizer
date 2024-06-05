@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piano</title>
+    <style>
+        .key {
+            width: 40px;
+            height: 200px;
+            display: inline-block;
+            border: 1px solid black;
+            margin: 2px;
+            background: white;
+            position: relative;
+        }
+
+        .black-key {
+            width: 30px;
+            height: 120px;
+            background: black;
+            position: absolute;
+            top: 0;
+            left: 30px;
+            z-index: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="piano">
+        <div class="key" data-note="C"></div>
+        <div class="key black-key" data-note="C#"></div>
+        <div class="key" data-note="D"></div>
+        <div class="key black-key" data-note="D#"></div>
+        <div class="key" data-note="E"></div>
+        <div class="key" data-note="F"></div>
+        <div class="key black-key" data-note="F#"></div>
+        <div class="key" data-note="G"></div>
+        <div class="key black-key" data-note="G#"></div>
+        <div class="key" data-note="A"></div>
+        <div class="key black-key" data-note="A#"></div>
+        <div class="key" data-note="B"></div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.key').forEach(key => {
+            key.addEventListener('click', () => {
+                const note = key.dataset.note;
+                fetch(`/play/${note}`)
+                    .then(response => response.blob())
+                    .then(blob => {
+                        const url = URL.createObjectURL(blob);
+                        const audio = new Audio(url);
+                        audio.play();
+                    })
+                    .catch(error => console.error('Error playing note:', error));
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -2,14 +2,41 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"path/filepath"
 	"piano-note-recognizer/pkg/audio"
 	"piano-note-recognizer/pkg/neuralnet"
 	"strings"
 
+	"github.com/gorilla/mux"
 	"gonum.org/v1/gonum/mat"
 	"gorgonia.org/tensor"
 )
+
+func server() {
+
+	r := mux.NewRouter()
+	r.HandleFunc("/", HomeHandler)
+	r.HandleFunc("/play/{note}", PlayNoteHandler)
+
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+
+	http.Handle("/", r)
+	fmt.Println("Starting server at :8080")
+	http.ListenAndServe(":8080", nil)
+}
+
+func HomeHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "static/index.html")
+}
+
+func PlayNoteHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	note := vars["note"]
+	filePath := filepath.Join("Notas_WAV", note+".wav")
+
+	http.ServeFile(w, r, filePath)
+}
 
 func prepareData() ([]*mat.Dense, []*mat.Dense, []string, []string) {
 	notes := []string{"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"}
@@ -19,7 +46,7 @@ func prepareData() ([]*mat.Dense, []*mat.Dense, []string, []string) {
 
 	for i, note := range notes {
 		filename := filepath.Join(filesDir, note+".wav")
-		// Asegurarse que cada archivo de audio tenga al menos 1024 muestras
+
 		audioData, err := audio.LoadAudio(filename, 1024)
 		if err != nil {
 			fmt.Printf("Error loading audio from %s: %v\n", filename, err)
