@@ -14,7 +14,6 @@ import (
 )
 
 func server() {
-
 	r := mux.NewRouter()
 	r.HandleFunc("/", HomeHandler)
 	r.HandleFunc("/play/{note}", PlayNoteHandler)
@@ -22,7 +21,7 @@ func server() {
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	http.Handle("/", r)
-	fmt.Println("Starting server at :8080")
+	fmt.Printf("Server started at: http://localhost:8080\n")
 	http.ListenAndServe(":8080", nil)
 }
 
@@ -117,6 +116,8 @@ func TestModel(rnn *neuralnet.RNN, filename string) {
 }
 
 func main() {
+
+	server()
 	trainData, validData, trainLabels, validLabels := prepareData()
 	if len(trainData) == 0 || len(validData) == 0 {
 		fmt.Println("Training or validation data is empty, cannot proceed.")
