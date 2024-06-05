@@ -13,6 +13,8 @@ import (
 	"gorgonia.org/tensor"
 )
 
+var rnn *neuralnet.RNN
+
 func server() {
 	r := mux.NewRouter()
 	r.HandleFunc("/", HomeHandler)
@@ -34,7 +36,42 @@ func PlayNoteHandler(w http.ResponseWriter, r *http.Request) {
 	note := vars["note"]
 	filePath := filepath.Join("Notas_WAV", note+".wav")
 
-	http.ServeFile(w, r, filePath)
+	audioData, err := audio.LoadAudio(filePath, 1024)
+	if err != nil {
+		http.Error(w, "Error loading audio", http.StatusInternalServerError)
+		return
+	}
+	spectrogram := audio.GenerateSpectrogram(audioData, 1024)
+	normalizedSpectrogram := audio.NormalizeSpectrogram(spectrogram)
+
+	if audio.CheckNaN(normalizedSpectrogram) {
+		http.Error(w, "NaN detected in normalized spectrogram", http.StatusInternalServerError)
+		return
+	}
+
+	var predictions []string
+	for i, segment := range normalizedSpectrogram {
+		if len(segment) != 1024 {
+			fmt.Printf("Skipping segment %d due to incorrect length: %d\n", i, len(segment))
+			continue
+		}
+		segmentMatrix := mat.NewDense(1024, 1, segment)
+		segmentTensor := tensor.New(tensor.WithShape(1, 1024), tensor.Of(tensor.Float64), tensor.WithBacking(segmentMatrix.RawMatrix().Data))
+
+		predictedNotes := rnn.Predict(segmentTensor)
+		if len(predictedNotes) == 0 {
+			fmt.Printf("No predictions for segment %d\n", i)
+		}
+		predictions = append(predictions, predictedNotes...)
+	}
+
+	if len(predictions) == 0 {
+		http.Error(w, "No notes were predicted", http.StatusInternalServerError)
+		return
+	}
+
+	predictedNote := predictions[0]
+	w.Write([]byte(predictedNote))
 }
 
 func prepareData() ([]*mat.Dense, []*mat.Dense, []string, []string) {
@@ -117,7 +154,8 @@ func TestModel(rnn *neuralnet.RNN, filename string) {
 
 func main() {
 
-	server()
+	go server()
+
 	trainData, validData, trainLabels, validLabels := prepareData()
 	if len(trainData) == 0 || len(validData) == 0 {
 		fmt.Println("Training or validation data is empty, cannot proceed.")
@@ -141,4 +179,5 @@ func main() {
 	testFilename := filepath.Join("Notas_WAV", "A.wav")
 	fmt.Println("Testing with file:", testFilename)
 	TestModel(rnn, testFilename)
+
 }

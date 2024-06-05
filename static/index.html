@@ -10,6 +10,7 @@
         body {
             font-family: Arial, sans-serif;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
@@ -84,14 +85,11 @@
             key.addEventListener('click', () => {
                 const note = key.dataset.note;
                 fetch(`/play/${note}`)
-                    .then(response => response.blob())
-                    .then(blob => {
-                        const url = URL.createObjectURL(blob);
-                        const audio = new Audio(url);
-                        audio.play();
-                        document.getElementById('noteDisplay').innerText = `Playing note: ${note}`;
+                    .then(response => response.text())
+                    .then(predictedNote => {
+                        document.getElementById('noteDisplay').innerText = `Predicted note: ${predictedNote}`;
                     })
-                    .catch(error => console.error('Error playing note:', error));
+                    .catch(error => console.error('Error predicting note:', error));
             });
         });
     </script>
