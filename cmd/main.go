@@ -101,7 +101,7 @@ func prepareData() ([]*mat.Dense, []*mat.Dense, []string, []string) {
 				fmt.Printf("Invalid slice length for note: %s, expected 1024, got %d\n", note, len(slice))
 				continue
 			}
-			matrix := mat.NewDense(1, 1024, slice) // cambio
+			matrix := mat.NewDense(1, 1024, slice)
 			if i%5 == 0 {
 				validData = append(validData, matrix)
 				validLabels = append(validLabels, note)
